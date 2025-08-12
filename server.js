@@ -143,7 +143,7 @@ app.post('/api/verify-license', async (req, res) => {
 
         res.json({
           success: true,
-          message: 'License verified successfully',
+          message: 'Company license verified successfully - This company is legitimate and licensed',
           license: {
             company_name: license.company_name,
             license_type: license.license_type,
@@ -162,6 +162,123 @@ app.post('/api/verify-license', async (req, res) => {
   }
 });
 
+// Company verification endpoint (by company name)
+app.post('/api/verify-company', async (req, res) => {
+  try {
+    const { company_name } = req.body;
+    
+    if (!company_name) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Company name is required' 
+      });
+    }
+
+    // Check if company exists and is licensed
+    db.get(
+      'SELECT * FROM licenses WHERE company_name LIKE ? AND status = "active"',
+      [`%${company_name}%`],
+      (err, license) => {
+        if (err) {
+          console.error('Database error:', err);
+          return res.status(500).json({ 
+            success: false, 
+            message: 'Internal server error' 
+          });
+        }
+
+        if (!license) {
+          // Log unlicensed company verification
+          const logId = uuidv4();
+          db.run(
+            'INSERT INTO verification_logs (id, license_key, ip_address, user_agent, verification_result) VALUES (?, ?, ?, ?, ?)',
+            [logId, 'UNLICENSED', req.ip, req.get('User-Agent'), 'unlicensed']
+          );
+
+          return res.status(404).json({ 
+            success: false, 
+            message: 'Company is not licensed on our platform - proceed with caution!' 
+          });
+        }
+
+        // Check if license is expired
+        if (license.expires_at && new Date(license.expires_at) < new Date()) {
+          // Log expired verification
+          const logId = uuidv4();
+          db.run(
+            'INSERT INTO verification_logs (id, license_key, ip_address, user_agent, verification_result) VALUES (?, ?, ?, ?, ?)',
+            [logId, license.license_key, req.ip, req.get('User-Agent'), 'expired']
+          );
+
+          return res.status(403).json({ 
+            success: false, 
+            message: 'Company license has expired - status uncertain' 
+          });
+        }
+
+        // Update verification count and last verified
+        db.run(
+          'UPDATE licenses SET verification_count = verification_count + 1, last_verified = CURRENT_TIMESTAMP WHERE id = ?',
+          [license.id]
+        );
+
+        // Log successful verification
+        const logId = uuidv4();
+        db.run(
+          'INSERT INTO verification_logs (id, license_key, ip_address, user_agent, verification_result) VALUES (?, ?, ?, ?, ?)',
+          [logId, license.license_key, req.ip, req.get('User-Agent'), 'valid']
+        );
+
+        res.json({
+          success: true,
+          message: 'Company verified successfully - This company is legitimate and licensed',
+          company: {
+            company_name: license.company_name,
+            license_type: license.license_type,
+            expires_at: license.expires_at,
+            verification_count: license.verification_count + 1
+          }
+        });
+      }
+    );
+  } catch (error) {
+    console.error('Company verification error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Internal server error' 
+    });
+  }
+});
+
+// Get all licensed companies
+app.get('/api/companies', (req, res) => {
+  try {
+    db.all(
+      'SELECT company_name, license_type, status, expires_at, verification_count FROM licenses WHERE status = "active" ORDER BY company_name',
+      (err, companies) => {
+        if (err) {
+          console.error('Database error:', err);
+          return res.status(500).json({ 
+            success: false, 
+            message: 'Failed to fetch companies' 
+          });
+        }
+
+        res.json({
+          success: true,
+          companies: companies
+        });
+      }
+    );
+  } catch (error) {
+    console.error('Companies fetch error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Internal server error' 
+    });
+  }
+});
+
 // Support request endpoint
 app.post('/api/support-request', async (req, res) => {
   try {
@@ -170,11 +287,11 @@ app.post('/api/support-request', async (req, res) => {
       contact_name,
       contact_email,
       contact_phone,
-      issue_description,
-      priority
+      business_type,
+      license_reason
     } = req.body;
 
-    if (!company_name || !contact_name || !contact_email || !issue_description) {
+    if (!company_name || !contact_name || !contact_email || !license_reason) {
       return res.status(400).json({
         success: false,
         message: 'Required fields are missing'
@@ -187,19 +304,19 @@ app.post('/api/support-request', async (req, res) => {
       `INSERT INTO support_requests 
        (id, company_name, contact_name, contact_email, contact_phone, issue_description, priority) 
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [supportId, company_name, contact_name, contact_email, contact_phone, issue_description, priority || 'medium'],
+      [supportId, company_name, contact_name, contact_email, contact_phone, license_reason, 'high'],
       function(err) {
         if (err) {
           console.error('Database error:', err);
           return res.status(500).json({
             success: false,
-            message: 'Failed to submit support request'
+            message: 'Failed to submit licensing request'
           });
         }
 
         res.json({
           success: true,
-          message: 'Support request submitted successfully',
+          message: 'Licensing request submitted successfully',
           request_id: supportId
         });
       }
@@ -216,7 +333,7 @@ app.post('/api/support-request', async (req, res) => {
 // Get license statistics (for admin dashboard)
 app.get('/api/stats', (req, res) => {
   try {
-    db.get('SELECT COUNT(*) as total_licenses FROM licenses', (err, licenses) => {
+    db.get('SELECT COUNT(*) as total_licenses FROM licenses WHERE status = "active"', (err, licenses) => {
       if (err) {
         return res.status(500).json({ success: false, message: 'Database error' });
       }
@@ -255,7 +372,7 @@ app.get('/', (req, res) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`Licensing system server running on port ${PORT}`);
+  console.log(`LicenseVerify Pro server running on port ${PORT}`);
   console.log(`Visit http://localhost:${PORT} to access the application`);
 });
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Professional Licensing System</title>
+    <title>LicenseVerify Pro - Verify Company Legitimacy</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -13,21 +13,25 @@
         <!-- Header -->
         <header class="header">
             <div class="logo">
-                <i class="fas fa-shield-alt"></i>
-                <h1>SecureLicense Pro</h1>
+                <i class="fas fa-shield-check"></i>
+                <h1>LicenseVerify Pro</h1>
             </div>
             <nav class="nav">
                 <button class="nav-btn active" data-tab="verification">
-                    <i class="fas fa-key"></i>
-                    License Verification
+                    <i class="fas fa-search"></i>
+                    Verify Company License
+                </button>
+                <button class="nav-btn" data-tab="companies">
+                    <i class="fas fa-building"></i>
+                    Licensed Companies
                 </button>
                 <button class="nav-btn" data-tab="support">
                     <i class="fas fa-headset"></i>
-                    Support Request
+                    Company Support
                 </button>
                 <button class="nav-btn" data-tab="about">
                     <i class="fas fa-info-circle"></i>
-                    About
+                    About Verification
                 </button>
             </nav>
         </header>
@@ -38,18 +42,26 @@
             <div class="tab-content active" id="verification">
                 <div class="verification-container">
                     <div class="verification-header">
-                        <h2><i class="fas fa-check-circle"></i> License Verification</h2>
-                        <p>Verify your software license to ensure compliance and access</p>
+                        <h2><i class="fas fa-shield-check"></i> Verify Company Legitimacy</h2>
+                        <p>Check if a company has a valid license before doing business with them</p>
+                        <div class="trust-banner">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Warning:</strong> Unlicensed companies may not be trustworthy. Always verify before engaging in business.
+                        </div>
                     </div>
                     
                     <div class="verification-form">
                         <div class="input-group">
-                            <label for="license-key">License Key</label>
-                            <input type="text" id="license-key" placeholder="Enter your license key" class="license-input">
+                            <label for="company-name">Company Name</label>
+                            <input type="text" id="company-name" placeholder="Enter company name to search" class="company-input">
                         </div>
-                        <button class="verify-btn" onclick="verifyLicense()">
+                        <div class="input-group">
+                            <label for="license-key">License Key (Optional)</label>
+                            <input type="text" id="license-key" placeholder="Enter license key if you have it" class="license-input">
+                        </div>
+                        <button class="verify-btn" onclick="verifyCompany()">
                             <i class="fas fa-search"></i>
-                            Verify License
+                            Verify Company Legitimacy
                         </button>
                     </div>
 
@@ -59,16 +71,69 @@
 
                     <div class="trust-indicators">
                         <div class="trust-item">
-                            <i class="fas fa-lock"></i>
-                            <span>256-bit Encryption</span>
-                        </div>
-                        <div class="trust-item">
                             <i class="fas fa-shield-alt"></i>
-                            <span>ISO 27001 Compliant</span>
+                            <span>Government Certified</span>
                         </div>
                         <div class="trust-item">
-                            <i class="fas fa-certificate"></i>
-                            <span>Certified Security</span>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Verified Legitimate</span>
+                        </div>
+                        <div class="trust-item">
+                            <i class="fas fa-award"></i>
+                            <span>Trusted Partner</span>
+                        </div>
+                    </div>
+
+                    <div class="why-verify">
+                        <h3>Why Verify Company Licenses?</h3>
+                        <div class="reasons-grid">
+                            <div class="reason-item">
+                                <i class="fas fa-shield-alt"></i>
+                                <h4>Protect Your Business</h4>
+                                <p>Avoid scams and fraudulent companies that operate without proper licensing</p>
+                            </div>
+                            <div class="reason-item">
+                                <i class="fas fa-handshake"></i>
+                                <h4>Build Trust</h4>
+                                <p>Licensed companies are verified legitimate and can be trusted for business</p>
+                            </div>
+                            <div class="reason-item">
+                                <i class="fas fa-chart-line"></i>
+                                <h4>Grow Together</h4>
+                                <p>Support legitimate businesses and help them compete against unlicensed competitors</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Licensed Companies Tab -->
+            <div class="tab-content" id="companies">
+                <div class="companies-container">
+                    <div class="companies-header">
+                        <h2><i class="fas fa-building"></i> Verified Licensed Companies</h2>
+                        <p>These companies have proven their legitimacy and can be trusted for business</p>
+                    </div>
+                    
+                    <div class="companies-grid" id="companies-grid">
+                        <!-- Companies will be populated here -->
+                    </div>
+
+                    <div class="company-stats">
+                        <div class="stat-item">
+                            <i class="fas fa-building"></i>
+                            <span class="stat-number" id="total-companies">0</span>
+                            <span class="stat-label">Licensed Companies</span>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-shield-check"></i>
+                            <span class="stat-number" id="verified-today">0</span>
+                            <span class="stat-label">Verified Today</span>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-users"></i>
+                            <span class="stat-number" id="trusted-by">0</span>
+                            <span class="stat-label">Trusted by Customers</span>
                         </div>
                     </div>
                 </div>
@@ -78,18 +143,18 @@
             <div class="tab-content" id="support">
                 <div class="support-container">
                     <div class="support-header">
-                        <h2><i class="fas fa-headset"></i> Support Request</h2>
-                        <p>Need help? Submit a support request and our team will assist you</p>
+                        <h2><i class="fas fa-headset"></i> Company Support & Licensing</h2>
+                        <p>Get your company licensed to prove legitimacy and gain customer trust</p>
                     </div>
                     
                     <form class="support-form" id="support-form">
                         <div class="form-row">
                             <div class="input-group">
-                                <label for="company-name">Company Name *</label>
-                                <input type="text" id="company-name" name="company_name" required>
+                                <label for="company-name-support">Company Name *</label>
+                                <input type="text" id="company-name-support" name="company_name" required>
                             </div>
                             <div class="input-group">
-                                <label for="contact-name">Contact Name *</label>
+                                <label for="contact-name">Contact Person *</label>
                                 <input type="text" id="contact-name" name="contact_name" required>
                             </div>
                         </div>
@@ -106,26 +171,50 @@
                         </div>
                         
                         <div class="input-group">
-                            <label for="priority">Priority Level</label>
-                            <select id="priority" name="priority">
-                                <option value="low">Low</option>
-                                <option value="medium" selected>Medium</option>
-                                <option value="high">High</option>
-                                <option value="critical">Critical</option>
+                            <label for="business-type">Business Type</label>
+                            <select id="business-type" name="business_type">
+                                <option value="technology">Technology</option>
+                                <option value="finance">Finance</option>
+                                <option value="healthcare">Healthcare</option>
+                                <option value="retail">Retail</option>
+                                <option value="manufacturing">Manufacturing</option>
+                                <option value="services">Professional Services</option>
+                                <option value="other">Other</option>
                             </select>
                         </div>
                         
                         <div class="input-group">
-                            <label for="issue-description">Issue Description *</label>
-                            <textarea id="issue-description" name="issue_description" rows="5" required 
-                                placeholder="Please describe your issue in detail..."></textarea>
+                            <label for="license-reason">Why do you need a license? *</label>
+                            <textarea id="license-reason" name="license_reason" rows="4" required 
+                                placeholder="Explain why your company needs verification and how it will help build customer trust..."></textarea>
                         </div>
                         
                         <button type="submit" class="submit-btn">
                             <i class="fas fa-paper-plane"></i>
-                            Submit Support Request
+                            Request Company Licensing
                         </button>
                     </form>
+
+                    <div class="licensing-benefits">
+                        <h3>Benefits of Getting Licensed</h3>
+                        <div class="benefits-grid">
+                            <div class="benefit-item">
+                                <i class="fas fa-trust"></i>
+                                <h4>Customer Trust</h4>
+                                <p>Prove your legitimacy and gain customer confidence</p>
+                            </div>
+                            <div class="benefit-item">
+                                <i class="fas fa-chart-line"></i>
+                                <h4>Business Growth</h4>
+                                <p>Outcompete unlicensed competitors and grow your business</p>
+                            </div>
+                            <div class="benefit-item">
+                                <i class="fas fa-shield-alt"></i>
+                                <h4>Market Protection</h4>
+                                <p>Protect your market share from unlicensed competitors</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -133,50 +222,54 @@
             <div class="tab-content" id="about">
                 <div class="about-container">
                     <div class="about-header">
-                        <h2><i class="fas fa-info-circle"></i> About SecureLicense Pro</h2>
-                        <p>Your trusted partner in software licensing and compliance</p>
+                        <h2><i class="fas fa-info-circle"></i> About License Verification</h2>
+                        <p>Protecting legitimate businesses and customers from fraud</p>
                     </div>
                     
                     <div class="about-content">
                         <div class="about-section">
-                            <h3><i class="fas fa-shield-alt"></i> Security & Compliance</h3>
-                            <p>Our licensing system meets the highest security standards including ISO 27001, SOC 2 Type II, and GDPR compliance. We use industry-leading encryption and security practices to protect your software assets.</p>
+                            <h3><i class="fas fa-shield-alt"></i> The Problem</h3>
+                            <p>Many companies operate without proper licensing, making it difficult for customers to distinguish legitimate businesses from fraudulent ones. This creates an unfair market where unlicensed companies can compete unfairly.</p>
                         </div>
                         
                         <div class="about-section">
-                            <h3><i class="fas fa-chart-line"></i> Performance & Reliability</h3>
-                            <p>With 99.9% uptime guarantee and sub-second response times, our system ensures your software licensing never becomes a bottleneck for your business operations.</p>
+                            <h3><i class="fas fa-solution"></i> Our Solution</h3>
+                            <p>We provide a verification platform where legitimate companies can get licensed and prove their authenticity. Customers can then verify any company on our platform to ensure they're dealing with a legitimate, licensed business.</p>
                         </div>
                         
                         <div class="about-section">
-                            <h3><i class="fas fa-users"></i> Customer Support</h3>
-                            <p>Our dedicated support team is available 24/7 to assist with any licensing issues, technical questions, or compliance concerns you may have.</p>
+                            <h3><i class="fas fa-handshake"></i> How It Works</h3>
+                            <p>Companies apply for licensing, we verify their legitimacy, and issue them a license. Customers can then verify any company on our platform to ensure they're dealing with a legitimate, licensed business.</p>
                         </div>
                         
                         <div class="about-section">
-                            <h3><i class="fas fa-award"></i> Industry Recognition</h3>
-                            <p>Recognized by leading industry analysts and trusted by Fortune 500 companies worldwide for our innovative approach to software licensing and compliance.</p>
+                            <h3><i class="fas fa-award"></i> Benefits for Everyone</h3>
+                            <p><strong>For Companies:</strong> Prove legitimacy, gain customer trust, compete fairly. <strong>For Customers:</strong> Avoid fraud, work with verified businesses, make informed decisions.</p>
                         </div>
                     </div>
                     
-                    <div class="certifications">
-                        <h3>Certifications & Compliance</h3>
-                        <div class="cert-grid">
-                            <div class="cert-item">
-                                <i class="fas fa-certificate"></i>
-                                <span>ISO 27001</span>
+                    <div class="verification-process">
+                        <h3>Verification Process</h3>
+                        <div class="process-steps">
+                            <div class="step">
+                                <div class="step-number">1</div>
+                                <h4>Company Applies</h4>
+                                <p>Company submits licensing application with business details</p>
                             </div>
-                            <div class="cert-item">
-                                <i class="fas fa-shield-alt"></i>
-                                <span>SOC 2 Type II</span>
+                            <div class="step">
+                                <div class="step-number">2</div>
+                                <h4>We Verify</h4>
+                                <p>Our team verifies business legitimacy and compliance</p>
                             </div>
-                            <div class="cert-item">
-                                <i class="fas fa-lock"></i>
-                                <span>GDPR Compliant</span>
+                            <div class="step">
+                                <div class="step-number">3</div>
+                                <h4>License Issued</h4>
+                                <p>Verified company receives official license and verification</p>
                             </div>
-                            <div class="cert-item">
-                                <i class="fas fa-check-circle"></i>
-                                <span>PCI DSS</span>
+                            <div class="step">
+                                <div class="step-number">4</div>
+                                <h4>Customer Trust</h4>
+                                <p>Customers can verify and trust the licensed company</p>
                             </div>
                         </div>
                     </div>
@@ -189,24 +282,24 @@
             <div class="footer-content">
                 <div class="footer-section">
                     <h4>Contact Us</h4>
-                    <p><i class="fas fa-envelope"></i> support@securelicense.com</p>
+                    <p><i class="fas fa-envelope"></i> licensing@licenseverify.com</p>
                     <p><i class="fas fa-phone"></i> +1 (555) 123-4567</p>
                 </div>
                 <div class="footer-section">
                     <h4>Quick Links</h4>
-                    <a href="#verification">License Verification</a>
-                    <a href="#support">Support Request</a>
-                    <a href="#about">About Us</a>
+                    <a href="#verification">Verify Company</a>
+                    <a href="#companies">Licensed Companies</a>
+                    <a href="#support">Get Licensed</a>
                 </div>
                 <div class="footer-section">
                     <h4>Legal</h4>
                     <a href="#">Privacy Policy</a>
                     <a href="#">Terms of Service</a>
-                    <a href="#">Compliance</a>
+                    <a href="#">Verification Standards</a>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2024 SecureLicense Pro. All rights reserved.</p>
+                <p>&copy; 2024 LicenseVerify Pro. Protecting legitimate businesses and customers.</p>
             </div>
         </footer>
     </div>
@@ -215,7 +308,7 @@
     <div class="loading-modal" id="loading-modal" style="display: none;">
         <div class="loading-content">
             <div class="spinner"></div>
-            <p>Processing your request...</p>
+            <p>Verifying company legitimacy...</p>
         </div>
     </div>
 
@@ -238,15 +331,17 @@
     <!-- Error Modal -->
     <div class="modal" id="error-modal" style="display: none;">
         <div class="modal-content">
-            <div class="modal-header error">
-                <i class="fas fa-exclamation-triangle"></i>
-                <h3>Error</h3>
-            </div>
-            <div class="modal-body">
-                <p id="error-message"></p>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" onclick="closeModal('error-modal')">Close</button>
+            <div class="modal-content">
+                <div class="modal-header error">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>Warning</h3>
+                </div>
+                <div class="modal-body">
+                    <p id="error-message"></p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="closeModal('error-modal')">Close</button>
+                </div>
             </div>
         </div>
     </div>
